@@ -1,6 +1,6 @@
 ---
 name: review-remediation
-description: Convert selected branch-review findings into dependency-ordered remediation tasks in the active Spec Kit tasks.md. Automatically include required findings, ask the user which optional findings to include, and plan appropriate unit, integration, and end-to-end regression coverage. Do not implement the tasks.
+description: Convert selected branch-review findings into dependency-ordered remediation tasks in the active Spec Kit tasks.md. Automatically include required findings, ask the user which optional findings to include, and require test-first remediation for behavioral issues with appropriate unit, integration, and end-to-end regression coverage. Do not implement the tasks.
 ---
 
 # Review Remediation
@@ -160,11 +160,33 @@ Plan both the implementation and the evidence needed to prove the fix works.
 For every selected finding explicitly evaluate:
 
 1. implementation changes
-2. unit tests
-3. integration tests
-4. E2E tests
+2. regression test that demonstrates the issue before the fix, when the finding affects observable behavior
+3. additional unit tests
+4. integration tests
+5. E2E tests
 
 Testing is part of remediation, not an optional cleanup step after implementation.
+
+### TDD requirement
+
+Behavioral remediation MUST use test-first development.
+
+For every selected behavioral finding:
+
+1. Add or update an automated regression test that reproduces the bug, regression, or missing behavior.
+2. Write the test task so the test is expected to fail against the current implementation.
+3. Add the implementation task that makes that regression test pass.
+4. Add any additional unit, integration, or E2E coverage needed to protect the corrected behavior.
+
+The regression-test task MUST appear before the corresponding implementation task in `tasks.md`.
+
+Do not use implementation-first ordering for behavioral remediation, even if the existing project, phase, or `tasks.md` uses that convention.
+
+Existing local conventions do not override this skill's TDD requirement.
+
+The purpose of remediation is to prove the issue exists before changing the implementation and then verify that the change resolves it.
+
+For non-behavioral findings where an automated regression test would not meaningfully demonstrate the issue, do not invent a low-value test solely to satisfy TDD. Document why test-first reproduction is not applicable and add appropriate verification if available.
 
 ### Unit test assessment
 
@@ -173,6 +195,8 @@ Add or update unit tests when the behavior can be meaningfully verified at the f
 Consider coverage for the regression scenario, corrected behavior, edge cases, null handling, validation, error paths, and business rules.
 
 Do not create a generic `Add unit tests` task. Specify what behavior the tests must prove.
+
+When TDD applies, do not describe the first test task merely as coverage added after the fix. Write it so the test captures the currently failing regression or missing behavior before the implementation change is made.
 
 ### Integration test assessment
 
@@ -193,24 +217,25 @@ E2E tests should protect meaningful workflows, not duplicate every unit assertio
 For every selected finding, explicitly decide:
 
 ```text
+Regression: Yes/No
 Unit: Yes/No
 Integration: Yes/No
 E2E: Yes/No
 ```
 
-A finding may require only unit coverage, unit + integration, integration + E2E, all three, or another appropriate combination.
+For behavioral findings, `Regression` should normally be `Yes` and must identify the lowest appropriate automated test layer that can reliably demonstrate the current defect before the fix.
 
-Do not mechanically add all three test types. Prefer the lowest useful test layer while adding higher-level coverage where the regression risk exists across boundaries or user workflows.
+A finding may require only a regression unit test, regression + integration, integration + E2E, all three, or another appropriate combination.
 
-If no new automated test is appropriate, document why existing coverage already proves the corrected behavior.
+Do not mechanically add all three test types. Use the lowest useful layer to demonstrate the defect first, then add higher-level coverage where the regression risk exists across boundaries or user workflows.
 
-A behavioral bug should normally result in regression coverage somewhere.
+If no automated regression test is appropriate for a selected finding, document why test-first reproduction is not meaningful for that finding.
 
 ## Phase 7: Create Spec Kit tasks
 
 Translate the remediation plan into tasks in the active `tasks.md`.
 
-Follow the file's existing Spec Kit structure.
+Follow the file's existing Spec Kit structure except where an existing ordering convention conflicts with the TDD rules in this skill.
 
 Use:
 
@@ -230,20 +255,31 @@ Use:
 8. Include concrete file paths whenever they can be determined.
 9. Make each task executable without requiring the implementer to reinterpret the original review.
 10. Keep implementation and meaningful test work visible as separate tasks when that improves execution clarity.
+11. For behavioral findings, never create the implementation task before the regression-test task that demonstrates the issue.
 
 Place tasks in the appropriate existing user-story or feature phase when possible. Use an existing cross-cutting/final phase for genuinely cross-cutting findings. Do not create a new user story just to hold review remediation.
 
-### Task ordering
+### Mandatory task ordering for behavioral remediation
 
-Use dependency order. For a behavioral regression, prefer when practical:
+For behavioral findings, use this order:
 
-1. regression test demonstrating the problem
+1. regression test demonstrating the issue
 2. implementation fix
 3. additional unit or edge-case coverage
 4. integration coverage
 5. E2E workflow coverage
 
-Adjust the order when the project's architecture or test setup requires it.
+The regression test must be capable of failing against the current implementation before the fix is applied.
+
+The implementation task depends on the regression-test task, not the reverse.
+
+Do not change this order to match an existing implementation-first pattern elsewhere in `tasks.md`.
+
+Existing project, phase, or task-file conventions do not override this ordering.
+
+Do not reorder unrelated or already completed historical tasks solely to make the entire file follow TDD. Apply the TDD requirement to the new remediation tasks created by this skill.
+
+For non-behavioral findings, use normal dependency ordering and document when test-first reproduction is not applicable.
 
 ## Example
 
@@ -265,16 +301,23 @@ Do not create only:
 - [ ] T042 [US2] Fix zero quantity orders
 ```
 
-A complete remediation might be:
+Do not create implementation-first remediation such as:
 
 ```text
-- [ ] T042 [US2] Add regression coverage for zero and negative order quantities in tests/Orders/OrderServiceTests.cs
-- [ ] T043 [US2] Reject non-positive order quantities in src/Orders/OrderService.cs
+- [ ] T042 [US2] Reject non-positive order quantities in src/Orders/OrderService.cs
+- [ ] T043 [US2] Add regression coverage for zero and negative order quantities in tests/Orders/OrderServiceTests.cs
+```
+
+Create the regression task first:
+
+```text
+- [ ] T042 [US2] Add a failing regression test proving zero and negative order quantities are currently accepted in tests/Orders/OrderServiceTests.cs
+- [ ] T043 [US2] Reject non-positive order quantities in src/Orders/OrderService.cs so the regression test passes
 - [ ] T044 [US2] Add API integration coverage verifying invalid quantities return the expected validation response in tests/Integration/Orders/OrderEndpointsTests.cs
 - [ ] T045 [US2] Add E2E coverage proving an invalid quantity cannot be submitted through the order workflow in tests/E2E/order-creation.spec.ts
 ```
 
-Only create the test layers justified by the actual finding and application architecture.
+Only create the additional test layers justified by the actual finding and application architecture.
 
 ## Scope control
 
@@ -290,6 +333,7 @@ Do not:
 - refactor unrelated code
 - silently include declined Optional findings
 - turn every suggestion into mandatory work
+- weaken or bypass the TDD requirement to match existing task ordering conventions
 
 If a selected finding exposes a substantially larger architectural issue, create the smallest safe remediation plan and call out the larger issue separately rather than silently expanding scope.
 
@@ -311,12 +355,19 @@ For each remediated finding, summarize the test decision, for example:
 
 ```text
 BR-001
+Regression: Added first — unit test reproduces current defect
 Unit: Added
 Integration: Added
 E2E: Not needed — behavior does not cross a user workflow boundary
 ```
 
-Call out any selected behavioral finding that received no new automated regression coverage and explain why.
+Call out any selected behavioral finding that did not receive a test-first automated regression task and explain why it was classified as non-behavioral or otherwise not testable.
+
+### TDD ordering
+
+State whether all behavioral remediation tasks were created test-first.
+
+If any behavioral finding was not ordered regression-test first, treat that as a planning error and correct `tasks.md` before completing the skill.
 
 ### Next step
 
