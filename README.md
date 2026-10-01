@@ -6,4 +6,4 @@ Each skill lives under skills/<skill-name>/SKILL.md.
 
 Install all skills with:
 
-npx skills add YOUR_GITHUB_USERNAME/ai-agent-skills --skill '*' --global --agent claude-code --agent codex --agent github-copilot --copy --yes
+npx skills add jkhaynes/ai-agent-skills --skill '*' --global --agent claude-code --agent codex --agent github-copilot --copy --yes
