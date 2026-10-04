@@ -1,0 +1,17 @@
+import assert from 'node:assert'
+import { parse } from './parse.ts'
+let p = parse('Running 40 tests using 4 workers\n  ✓  [chromium] › a.spec.ts:3 ok (1s)\n[12/40] [chromium] › b.spec.ts\n')
+assert.equal(p.done, 12); assert.equal(p.total, 40)
+p = parse('scanning\nPROGRESS 3/10 altaria_back.jpg\nmeasured 2/3 corners\n')
+assert.equal(p.done, 3); assert.equal(p.total, 10)
+p = parse(' Test Files  2 failed | 10 passed (12)\n      Tests  3 failed | 88 passed (91)\n')
+assert.equal(p.passed, 88); assert.equal(p.failed, 3)
+p = parse('Failed!  - Failed:     1, Passed:    41, Skipped:     0, Total:    42\n')
+assert.equal(p.passed, 41); assert.equal(p.failed, 1)
+p = parse('Evaluating scenarios 45%\r Evaluating scenarios 60%')
+assert.equal(p.pct, 60); assert.equal(p.last, 'Evaluating scenarios 60%')
+p = parse('log at 2026/10/04 12:00\n')
+assert.equal(p.total, undefined)
+p = parse('........................................ [ 22%]\n....................................... [ 45%]\n')
+assert.equal(p.pct, 45)
+console.log('parse checks ok')
