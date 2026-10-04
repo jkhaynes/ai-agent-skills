@@ -1,0 +1,1 @@
+{ "name": "job-progress", "version": "0.1.0", "description": "Live progress pane for long-running test, scenario and batch jobs", "types": "./types/index.d.ts" }
