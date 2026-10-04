@@ -4,23 +4,13 @@ A Claude Code mod that shows a live **Progress** pane for long-running jobs Clau
 
 Each job gets a soft pink bar with a green growing tip, a plant that grows as the job runs, pass/fail counts, elapsed time, an ETA and the latest output line. When the job ends it either **blooms** or **wilts**:
 
-```
-● Run capture tests  1m 12s
-▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱  58%
-🌰 → 🌱 → 🌿 ·  ·
-23/40 · ✓21 · ✗2 · ~52s left
-› PROGRESS 23/40 altaria_back.jpg
+![The Progress pane running three jobs: a capture run and an e2e suite filling pink bars, and a unit test run that has bloomed](docs/job-progress.gif)
 
-✿ Unit tests  34s
-▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰ 🌸 bloomed
-🌰 → 🌱 → 🌿 → 🪴 → 🌸
-88/88 · ✓88
+<sub>Three demo jobs over 20 seconds: the unit tests bloom, the e2e suite wilts after two failures, and a capture run of 30 test cards blooms. The frames come from the mod's own render hook on the terminal surface, mounted with `claude plugin test` and fed demo job states, then painted in Cascadia Mono. They show what the pane draws, but they aren't a screen recording.</sub>
 
-✗ Scenario eval  4m 03s
-▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰ 🥀 wilted
-🌰 → 🌱 → 🌿 → 🪴 → 🥀
-100/100 · ✓97 · ✗3
-```
+| Running | Finished |
+| --- | --- |
+| ![Two jobs mid-run with ETAs, and unit tests already bloomed](docs/running.png) | ![All three finished: two bloomed, one wilted with 2 failures](docs/finished.png) |
 
 A toast says "🌸 … bloomed" or "🥀 … wilted" when a job finishes. To remove finished jobs, run `/progress clear`, which works everywhere. Clicking **Clear finished** works in the desktop app and the fullscreen terminal. In the regular terminal, the button only responds to the `c` key while the pane has focus.
 
