@@ -1,0 +1,117 @@
+=== weakness-not-applied ===
+=== PokeJudge AI — Milestone 8 Scenario Evaluation ===
+
+Reranked by: Jev
+
+Searching across 515 chunks. 1 scenario(s), 1 run(s) each.
+
+Pacing model calls to 14 per minute (Gemini:RequestsPerMinute).
+
+--- [weakness-not-applied] Attack Resolution ---
+A judge is called over because a player's Pokemon was Knocked Out by an attack, but the opponent thinks the damage might have been calculated incorrectly -- their Pokemon has a printed Weakness to the attack's type, and they're not sure whether that was factored in.
+Turns used: 4 (turn cap exhausted)
+Rounds of questions: 4
+  [Turn 1 retrieved] TCGRULES-full-details-of-attacking#3 (0.7535), TCGRULES-turn-actions#9 (0.7367), TCGRULES-turn-actions#8 (0.7148), TCGRULES-appendix-21-dual-type-pok-mon#0 (0.6902), TCGRULES-full-details-of-attacking#2 (0.7231)
+  [Turn 1 question — re: TCGRULES-turn-actions#9] Was the Pokémon that got Knocked Out in the Active position or on the Bench when the attack happened?
+    Judge: The Defending Pokémon was in the Active position when it took the damage.
+  [Turn 1 question — re: TCGRULES-full-details-of-attacking#2] Did the attack deal direct damage or did it place damage counters?
+    Judge: Not known. (not known)
+  [Turn 2 retrieved] TCGRULES-full-details-of-attacking#3 (0.7602), TCGRULES-turn-actions#9 (0.7557), TCGRULES-full-details-of-attacking#2 (0.7397), TCGRULES-turn-actions#8 (0.7252), TCGRULES-glossary#2 (0.7153)
+  [Turn 2 question — re: TCGRULES-full-details-of-attacking#2] Did the attack deal direct damage or did it instruct the player to place damage counters?
+    Judge: Not known. (not known)
+  [Turn 3 retrieved] TCGRULES-full-details-of-attacking#2 (0.7430), TCGRULES-full-details-of-attacking#3 (0.7552), TCGRULES-turn-actions#9 (0.7545), TCGRULES-turn-actions#8 (0.7242), TCGRULES-full-details-of-attacking#4 (0.7426)
+  [Turn 3 question — re: TCGRULES-full-details-of-attacking#2] Did the attack deal direct damage or did it instruct the player to place damage counters?
+    Judge: Not known. (not known)
+  [Turn 4 retrieved] TCGRULES-full-details-of-attacking#3 (0.7581), TCGRULES-full-details-of-attacking#2 (0.7430), TCGRULES-turn-actions#9 (0.7566), TCGRULES-turn-actions#8 (0.7282), TCGRULES-full-details-of-attacking#4 (0.7422)
+  [Turn 4 question — re: TCGRULES-full-details-of-attacking#2] Did the attack deal direct damage or did it instruct the player to place damage counters?
+    Judge: Not known. (not known)
+  Not answerable from the scenario or fact sheet: 4 of 5 question(s)
+  [PASS] Initial retrieval: Retrieved at least one expected material section on turn 1.
+  [PASS] Sufficiency timing: Correctly recognized the initial scenario was incomplete.
+  [PASS] Clarifying question materiality: Question was tied to an expected material section (TCGRULES-turn-actions#9).
+  [PASS] Post-answer retrieval: Retrieval after the judge's answer surfaced an expected section.
+  [FAIL] Final Source Support: No ruling was produced to evaluate.
+
+--- By category ---
+  Attack Resolution: 0/1 passed
+
+Result: 0/1 scenarios fully passed all applicable criteria.
+Questions the scenario and fact sheet couldn't answer: 4 of 5 (reported, not scored).
+PROGRESS 1/3 weakness-not-applied
+=== spectator-badges ===
+=== PokeJudge AI — Milestone 8 Scenario Evaluation ===
+
+Reranked by: Jev
+
+Searching across 515 chunks. 1 scenario(s), 1 run(s) each.
+
+Pacing model calls to 14 per minute (Gemini:RequestsPerMinute).
+
+--- [spectator-badges] Tournament Procedure ---
+Do spectators need to wear a badge at a Regional Championship?
+Turns used: 1 (reached sufficiency)
+Rounds of questions: 0
+  [Turn 1 retrieved] PPTRH-2.4#0 (0.8054), PPTRH-3.3#1 (0.7065), PPTRH-3.1#0 (0.6988), PPTRH-2.4#1 (0.7419), PPTRH-3.3#5 (0.7367)
+  [PASS] Initial retrieval: Retrieved at least one expected material section on turn 1.
+  [PASS] Sufficiency timing: Resolved without unnecessary clarification, as expected.
+  [PASS] Final Source Support: Validated Source Support (Strong) was in the acceptable set.
+  Model's own assessment: Strong | Validated: Strong
+
+Recommendation: It is recommended that the judge advise the spectator that Regional Championships are badged events requiring attendance passes, and attendees are required to wear their badge in a visible location during the entirety of their attendance at the event and other badged locations, as well as present it for review if requested by tournament staff.
+Model's own assessment (unvalidated): Strong — The retrieved passage explicitly states that Regional Championships are badged events and details the requirement to wear the badge in a visible location during the entirety of participation or attendance.
+Validated Source Support: Strong — Every citation exists, all facts were confirmed sufficient, and every cited passage explicitly supports its claim with no conflicts.
+
+Explanation: Regional Championships are badged events that require a prepurchased pass to enter. Individuals are required to wear their badge in a visible location during the entirety of their participation or attendance at the event and other badged locations, and must present it for review if requested by tournament staff.
+
+Cited chunk IDs: PPTRH-2.4#0
+
+Citation grounding breakdown:
+  [PPTRH-2.4#0] ExplicitSupport
+  Deterministic checks: retrieval non-empty=True, all citations exist=True, facts were sufficient=True
+
+--- By category ---
+  Tournament Procedure: 1/1 passed
+
+Result: 1/1 scenarios fully passed all applicable criteria.
+Questions the scenario and fact sheet couldn't answer: 0 of 0 (reported, not scored).
+PROGRESS 2/3 spectator-badges
+=== gx-attack-twice ===
+=== PokeJudge AI — Milestone 8 Scenario Evaluation ===
+
+Reranked by: Jev
+
+Searching across 515 chunks. 1 scenario(s), 1 run(s) each.
+
+Pacing model calls to 14 per minute (Gemini:RequestsPerMinute).
+
+--- [gx-attack-twice] Timing Questions ---
+A judge is asked whether a player can use a GX attack with a second Pokemon-GX later in the same game, having already used a GX attack with a different Pokemon-GX earlier.
+Turns used: 1 (reached sufficiency)
+Rounds of questions: 0
+  [Turn 1 retrieved] TCGRULES-appendix-19-pok-mon-gx#0 (0.7474), TCGRULES-glossary#4 (0.6834), TCGRULES-glossary#5 (0.6582), PPG-2.3#0 (0.6560), TCGTH-6.3.1#1 (0.6720)
+  [PASS] Initial retrieval: Retrieved at least one expected material section on turn 1.
+  [PASS] Sufficiency timing: Resolved without unnecessary clarification, as expected.
+  [PASS] Final Source Support: Validated Source Support (Strong) was in the acceptable set.
+  Model's own assessment: Strong | Validated: Strong
+
+Recommendation: It is recommended to inform the player that they cannot use a second GX attack later in the same game. A player is restricted to using only one GX attack per game, regardless of how many Pokémon-GX they have in play.
+Model's own assessment (unvalidated): Strong — The retrieved passages explicitly state that a player cannot use more than one GX attack during an entire game, directly answering the question with no conflicting information.
+Validated Source Support: Strong — Every citation exists, all facts were confirmed sufficient, and every cited passage explicitly supports its claim with no conflicts.
+
+Explanation: According to the rules, a player cannot use more than one GX attack during an entire game, regardless of how many Pokémon-GX they play. Once a GX attack has been used, no further GX attacks may be used for the remainder of that game.
+
+Cited chunk IDs: TCGRULES-appendix-19-pok-mon-gx#0, TCGRULES-glossary#4
+
+Citation grounding breakdown:
+  [TCGRULES-appendix-19-pok-mon-gx#0] ExplicitSupport
+  [TCGRULES-glossary#4] ExplicitSupport
+  Deterministic checks: retrieval non-empty=True, all citations exist=True, facts were sufficient=True
+
+--- By category ---
+  Timing Questions: 1/1 passed
+
+Result: 1/1 scenarios fully passed all applicable criteria.
+Questions the scenario and fact sheet couldn't answer: 0 of 0 (reported, not scored).
+PROGRESS 3/3 gx-attack-twice
+
+[exited with code 0]
