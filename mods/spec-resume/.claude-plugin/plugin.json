@@ -1,0 +1,1 @@
+{ "name": "spec-resume", "version": "0.1.0", "description": "After startup or /clear in a Spec Kit repo, tells Claude the branch, current spec and phase, unchecked tasks and open PRs" }
