@@ -4,6 +4,11 @@ export type Job = {
   path: string
   startedAt: number
   status: string
+  /** A dev server: no bar, no bloom or wilt, a Stop button. */
+  kind?: 'job' | 'server'
+  /** The marker its shell's command line carries, for stopping the whole process tree. */
+  tag?: string
+  port?: number
   endedAt?: number
   size?: number
   done?: number
@@ -11,6 +16,7 @@ export type Job = {
   pct?: number
   passed?: number
   failed?: number
+  unit?: string
   last?: string
 }
 
