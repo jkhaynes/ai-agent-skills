@@ -1,0 +1,11 @@
+{
+  "intro": {
+    "say": "This is Fernlist, a cozy to-do list for keeping plants happy."
+  },
+  "add": {
+    "say": "Adding a task takes a name, and it's on the list straight away."
+  },
+  "outro": {
+    "say": "That's Fernlist. Happy growing."
+  }
+}
