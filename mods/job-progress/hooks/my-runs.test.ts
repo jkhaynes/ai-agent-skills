@@ -18,11 +18,12 @@ test('a PokeJudge eval is backgrounded', async ($, on) => {
   expect(shell[0]?.run_in_background).toBe(true)
 })
 
-test('a ten-or-not attack sweep and a CI watch are backgrounded', async ($, on) => {
+test('runs not on the list are left as they are, backgrounded or not', async ($, on) => {
   const shell = engine(on)
   await $.tool.call({ tool: 'Bash', command: 'uv run python tools/attacks.py run baseline-7677564' } as any)
-  await $.tool.call({ tool: 'Bash', command: 'gh pr checks 103 --watch --fail-fast' } as any)
-  expect(shell.map(e => e.run_in_background)).toEqual([true, true])
+  await $.tool.call({ tool: 'Bash', command: 'gh pr checks 103 --watch --fail-fast | tail -5', run_in_background: true } as any)
+  expect(shell.map(e => e.run_in_background)).toEqual([undefined, true])
+  expect(shell[1]?.command).toBe('gh pr checks 103 --watch --fail-fast | tail -5')
 })
 
 test('a long sleep runs when no job is running', async ($, on) => {
