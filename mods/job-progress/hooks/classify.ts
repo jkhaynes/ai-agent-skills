@@ -7,14 +7,13 @@ import type { Job } from '../types'
 // Quoted text is blanked first, so a runner named inside a filter, a pattern or a message
 // (`-notmatch 'playwright|vitest'`, `grep "pytest"`) doesn't count. Leading env assignments,
 // `time`, `timeout N` and wrappers (npx, bunx, pnpm exec, uv run, poetry run) are dropped so
-// the step starts with its program; `timed` says a `timeout N` came off.
-function steps(command: string): { program: string; timed: boolean }[] {
+// the step starts with its program.
+function steps(command: string): { program: string }[] {
   const unquoted = command.replace(/'[^']*'|"(?:[^"\\]|\\.)*"/g, '""')
   return unquoted
     .split(/&&|\|\||[;|\n]/)
     .map(raw => {
       let program = raw.trim().replace(/^[({&\s]+/, '')
-      let timed = false
       for (;;) {
         const next = program
           .replace(/^[({]\s*/, '')
@@ -23,39 +22,32 @@ function steps(command: string): { program: string; timed: boolean }[] {
           .replace(/^\$env:\w+\s*=\s*\S+\s*/i, '')
           .replace(/^\w+=\S*\s+/, '')
           .replace(/^time\s+(-p\s+)?/, '')
-          .replace(/^timeout\s+\d+\s+/, () => ((timed = true), ''))
+          .replace(/^timeout\s+\d+\s+/, '')
           .replace(/^(npx|bunx|pnpm\s+exec|uv\s+run|poetry\s+run)\s+(--?[\w-]+(=\S+)?\s+)*/, '')
         if (next === program) break
         program = next
       }
-      return { program, timed }
+      return { program }
     })
     .filter(step => step.program)
 }
 
 const anyOf = (...parts: string[]) => new RegExp(`^(?:${parts.join('|')})`, 'i')
 
-// Test runners, moved to the background (when the call left run_in_background unset) so the
-// pane can follow them. Anything else shows up once Claude backgrounds it.
-const RUNNER = anyOf(
+// The only jobs the pane follows. Nothing else gets a row, even when Claude backgrounds it:
+// to follow a new kind of job, add it here. Each one is moved to the background (when the call
+// left run_in_background unset) so the pane can see its output.
+const FOLLOWED = anyOf(
+  // Unit, integration and e2e test runs.
   String.raw`(vitest|jest|pytest)\b`,
   String.raw`playwright\s+test\b`,
   String.raw`python\d?\s+-m\s+pytest\b`,
   String.raw`(dotnet|go|cargo)\s+test\b`,
-  String.raw`(npm|pnpm|yarn|bun)\s+(run\s+)?(test|e2e|bench)[\w:-]*`,
+  String.raw`(npm|pnpm|yarn|bun)\s+(run\s+)?(test|e2e)[\w:-]*`,
   String.raw`node\s+(\S+\s+)*?\S*cli\.js\s+test\b`,
-)
-
-// Long runs from my own projects that ran in the foreground, out of the pane's sight: PokeJudge
-// evals, ten-or-not attack sweeps and tuning snapshots, CI and deploy watches.
-const MY_RUNS = anyOf(
+  // PokeJudge case runs.
   String.raw`dotnet\s+run\b.*\bevaluate\b`,
-  String.raw`python\d?\s+\S*(attacks|tuning_report|make_e2e_fixtures|click_measure)\.py\b`,
-  String.raw`gh\s+run\s+watch\b`,
-  String.raw`gh\s+pr\s+checks\b.*--watch`,
 )
-// Log tails, only when a `timeout N` bounds them.
-const TIMED_TAIL = anyOf(String.raw`(node\s+\S*)?wrangler(\.js)?\s+tail\b`)
 
 // Dev servers (LMI's dev:e2e and bench:serve, vite, wrangler dev, uvicorn): they never finish,
 // so the pane lists them apart, with their port and a Stop button, and stopping one isn't a wilt.
@@ -73,9 +65,17 @@ const PORT = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0):(\d{2,5})|--port[= ](\d{2,5}
 const LONG_SLEEP = /^\s*(?:Start-)?sleep\s+(?:-Seconds\s+)?(\d+)/i
 
 export const isFollowed = (command: string) =>
-  steps(command).some(({ program, timed }) => RUNNER.test(program) || MY_RUNS.test(program) || (timed && TIMED_TAIL.test(program)))
+  steps(command).some(({ program }) => FOLLOWED.test(program))
 
 export const isServerCommand = (command: string) => steps(command).some(({ program }) => SERVER.test(program))
+
+// What row a background task gets from the command that started it: a dev server, a followed
+// job, or none (undefined). A task whose command isn't known gets none either.
+export function rowKind(command: string | undefined): 'server' | 'job' | undefined {
+  if (!command) return undefined
+  if (isServerCommand(command)) return 'server'
+  return isFollowed(command) ? 'job' : undefined
+}
 
 export function portOf(text: string): number | undefined {
   const m = PORT.exec(text)

@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import type { Job } from '../types'
-import { KILL_TREE, isFollowed, isServerCommand, killResult, portOf, serversToStop, sleepDenial, stopFailure, tagCommand } from './classify'
+import { KILL_TREE, isFollowed, isServerCommand, killResult, portOf, rowKind, serversToStop, sleepDenial, stopFailure, tagCommand } from './classify'
 import { parse } from './parse'
 
 const PANE = 'job-progress'
@@ -13,14 +13,12 @@ const SHELLS = ['Bash', 'PowerShell']
 const jobs = atom({ plugin: 'job-progress', key: 'jobs' } as const, [])
 
 const HINT =
-  '\n\nLong-running jobs (test suites, e2e runs, scenario or eval runs, batch processing such as running ' +
-  'test images through a pipeline): run them with run_in_background so the person can watch them in their ' +
-  'Progress pane. Do not pipe a background job through tail, head or grep: that holds its output back until it ' +
-  'ends and the pane stays blank; read the output file afterwards instead. In scripts you write for such runs, ' +
-  'print a line `PROGRESS <done>/<total> <item>` as each item finishes (and flush, e.g. python -u). ' +
-  'Do not redirect a background job into a log file of your own (`> "$LOG"`, `> /tmp/e2e.log`): its output ' +
-  'file is already the log, and the pane can only follow that one. Do not `sleep` to wait for a background job: ' +
-  'you are notified when it ends, so do other work or end your turn.'
+  '\n\nUnit, integration and e2e test runs and PokeJudge case runs (`dotnet run … evaluate`): run them with ' +
+  'run_in_background so the person can watch them in their Progress pane. Do not pipe them through tail, head ' +
+  'or grep: that holds their output back until they end and the pane stays blank; read the output file ' +
+  'afterwards instead. Do not redirect them into a log file of your own (`> "$LOG"`, `> /tmp/e2e.log`): the ' +
+  'output file is already the log, and the pane can only follow that one. Do not `sleep` to wait for a ' +
+  'background job: you are notified when it ends, so do other work or end your turn.'
 
 // `| tail -N` / `| head -N` ending a step (before &&, ||, ; or the end) of a command the pane follows:
 // dropped, since a background job's output goes to a file anyway and the pipe would hide all
@@ -230,13 +228,14 @@ export const register: Register = on => {
     labels.set(e.tool_use_id, { label: args.description || command.slice(0, 60), command })
     const deny = args.run_in_background ? undefined : sleepDenial(command, (await read($, jobs)) ?? [])
     if (deny) return { deny }
-    if (args.run_in_background === false || !(args.run_in_background || isFollowed(command))) return next(e)
-    const rewritten = backgroundCommand(e.tool, command)
-    return next({
-      ...e,
-      run_in_background: true,
-      command: isServerCommand(command) ? tagCommand(e.tool, rewritten, e.tool_use_id) : rewritten,
-    })
+    if (args.run_in_background === false) return next(e)
+    // Followed jobs go to the background; a server Claude backgrounds is marked for stopping.
+    // Any other command, backgrounded or not, is left as it is.
+    if (isFollowed(command)) return next({ ...e, run_in_background: true, command: backgroundCommand(e.tool, command) })
+    if (args.run_in_background && isServerCommand(command)) {
+      return next({ ...e, command: tagCommand(e.tool, backgroundCommand(e.tool, command), e.tool_use_id) })
+    }
+    return next(e)
   })
 
   // The shell's result row says where a background job writes ("running in background with ID: X.
@@ -245,21 +244,23 @@ export const register: Register = on => {
     const raw = rowText((e.message as { content?: unknown }).content)
 
     const started = STARTED.exec(raw)
-    if (started) {
+    const useId = started ? /tool_use_id=(\S+)/.exec(raw)?.[1] : undefined
+    const call = useId ? labels.get(useId) : undefined
+    const kind = rowKind(call?.command)
+    const server = kind === 'server'
+    // Only followed jobs and dev servers get a row; any other background task is not the pane's.
+    if (started && call && kind) {
       const [, id, path] = started
-      const useId = /tool_use_id=(\S+)/.exec(raw)?.[1]
-      const call = useId ? labels.get(useId) : undefined
-      const server = isServerCommand(call?.command ?? '')
       const job: Job = {
         id,
         path,
-        label: call?.label || 'Background job',
+        label: call.label || 'Background job',
         startedAt: await $.clock.now(),
         status: 'running',
-        ...(server ? { kind: 'server' as const, port: portOf(call?.command ?? ''), tag: useId } : {}),
+        ...(server ? { kind: 'server' as const, port: portOf(call.command), tag: useId } : {}),
       }
+      // No auto-open: the pane only opens on /progress.
       await update($, jobs, list => [...(list ?? []).filter(j => j.id !== id), job].slice(-20))
-      void $.ui.open(OPEN)
     }
 
     const id = /<task-id>([^<]+)<\/task-id>/.exec(raw)?.[1]
@@ -295,7 +296,7 @@ export const register: Register = on => {
       return (
         <Box flexDirection="column">
           <Text dimColor>No jobs yet.</Text>
-          <Text dimColor>Background test, scenario and batch runs show up here.</Text>
+          <Text dimColor>Test runs and PokeJudge case runs show up here.</Text>
           <Box marginTop={1}>{close}</Box>
         </Box>
       )

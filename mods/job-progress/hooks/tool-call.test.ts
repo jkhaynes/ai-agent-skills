@@ -21,11 +21,11 @@ test('a test runner piped through tail is backgrounded, unpiped and unbuffered',
 test('a mid-chain tail is dropped and the rest of the chain kept', async ($, on) => {
   const e = await rewrite($, on, {
     tool: 'Bash',
-    command: 'uv run python tools/attacks.py run x 2>&1 | tail -5 && uv run python tools/attacks.py compare a b > f.txt; head -40 f.txt',
+    command: 'uv run pytest tests/unit -q 2>&1 | tail -5 && uv run pytest tests/integration > f.txt; head -40 f.txt',
     run_in_background: true,
   })
   expect(e.command).toBe(
-    'export PYTHONUNBUFFERED=1; uv run python tools/attacks.py run x 2>&1 && uv run python tools/attacks.py compare a b > f.txt; head -40 f.txt',
+    'export PYTHONUNBUFFERED=1; uv run pytest tests/unit -q 2>&1 && uv run pytest tests/integration > f.txt; head -40 f.txt',
   )
 })
 

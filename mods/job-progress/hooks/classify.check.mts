@@ -1,14 +1,25 @@
 import assert from 'node:assert'
-import { isFollowed, isServerCommand, killResult, portOf, serversToStop, sleepDenial, stopFailure, tagCommand } from './classify.ts'
+import { isFollowed, isServerCommand, killResult, portOf, rowKind, serversToStop, sleepDenial, stopFailure, tagCommand } from './classify.ts'
 
-// Commands from my projects that ran in the foreground for minutes.
+// Only test runs and PokeJudge case runs are followed.
 assert.ok(isFollowed('dotnet run --project PokeJudge --no-build -- evaluate --only notes'))
-assert.ok(isFollowed('uv run python tools/attacks.py run baseline-7677564'))
-assert.ok(isFollowed('gh pr checks 103 --watch --fail-fast'))
-assert.ok(isFollowed('timeout 900 node node_modules/wrangler/bin/wrangler.js tail loot-membership-integration-production'))
 assert.ok(isFollowed('npm run test:e2e -- tag-rename'))
+assert.ok(!isFollowed('uv run python tools/attacks.py run baseline-7677564'))
+assert.ok(!isFollowed('gh pr checks 103 --watch --fail-fast'))
+assert.ok(!isFollowed('timeout 900 node node_modules/wrangler/bin/wrangler.js tail loot-membership-integration-production'))
+assert.ok(!isFollowed('npm run bench'))
 assert.ok(!isFollowed('gh run list --limit 1'))
-assert.ok(!isFollowed('node node_modules/wrangler/bin/wrangler.js tail x'))
+
+// Which background tasks get a row in the pane.
+assert.equal(rowKind('npm run test:e2e'), 'job')
+assert.equal(rowKind('uv run pytest tests/integration -q'), 'job')
+assert.equal(rowKind('dotnet test PokeJudge.slnx'), 'job')
+assert.equal(rowKind('dotnet run --project PokeJudge --no-build -- evaluate --only notes'), 'job')
+assert.equal(rowKind('npm run dev:e2e'), 'server')
+assert.equal(rowKind('uv run python tools/attacks.py run baseline-7677564'), undefined)
+assert.equal(rowKind('gh pr checks 103 --watch'), undefined)
+assert.equal(rowKind('npm run build'), undefined)
+assert.equal(rowKind(undefined), undefined)
 
 assert.ok(isServerCommand('npm run dev:e2e > "C:/tmp/dev.log" 2>&1'))
 assert.ok(isServerCommand('npm run bench:serve'))

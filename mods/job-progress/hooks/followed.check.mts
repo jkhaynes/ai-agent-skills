@@ -15,11 +15,6 @@ for (const cmd of [
   'dotnet test PokeJudge.slnx',
   "$env:PYTHONUNBUFFERED = '1'; dotnet test PokeJudge.slnx",
   'dotnet build -v q && dotnet run --project PokeJudge --no-build -- evaluate --only notes',
-  'uv run python tools/attacks.py run baseline-7677564 > .tuning/run2.log 2>&1',
-  'PYTHONPATH=. uv run python tests/helpers/make_e2e_fixtures.py 2>&1 | tail -1',
-  'gh run watch 36514578724 -R jkhaynes/pricewatch-data --exit-status',
-  'gh pr checks 103 --watch --fail-fast',
-  'CLOUDFLARE_ACCOUNT_ID=abc timeout 900 node node_modules/wrangler/bin/wrangler.js tail x --format json',
   'go test ./...',
   'dotnet build -v q 2>&1 | head -3 && time (dotnet run --project PokeJudge --no-build -- evaluate --only notes)',
   'cd frontend; for i in 1 2 3; do npx playwright test --reporter=line 2>&1 | tail -2; done',
@@ -39,6 +34,14 @@ for (const cmd of [
   'npm run dev:e2e',
   'gh run list --limit 1',
   'node node_modules/wrangler/bin/wrangler.js tail x',
+  // Long runs that aren't on the list.
+  'uv run python tools/attacks.py run baseline-7677564 > .tuning/run2.log 2>&1',
+  'PYTHONPATH=. uv run python tests/helpers/make_e2e_fixtures.py 2>&1 | tail -1',
+  'gh run watch 36514578724 -R jkhaynes/pricewatch-data --exit-status',
+  'gh pr checks 103 --watch --fail-fast',
+  'CLOUDFLARE_ACCOUNT_ID=abc timeout 900 node node_modules/wrangler/bin/wrangler.js tail x --format json',
+  'npm run bench:serve',
+  'npm run build',
 ]) assert.ok(!isFollowed(cmd), `should not follow: ${cmd}`)
 
 assert.ok(isServerCommand('npm run dev:e2e > "C:/tmp/dev.log" 2>&1'))

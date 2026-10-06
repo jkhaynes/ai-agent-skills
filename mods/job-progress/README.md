@@ -1,6 +1,6 @@
 # job-progress
 
-A Claude Code mod that shows a live **Progress** pane for long-running jobs Claude runs: unit, integration and e2e test suites, scenario/eval runs, batch runs such as test images through a capture pipeline.
+A Claude Code mod that shows a live **Progress** pane for the long-running jobs Claude runs that are on its list: unit, integration and e2e test runs, and PokeJudge case runs. Nothing else gets a row, even when Claude runs it in the background. To follow a new kind of job, add it to `FOLLOWED` in `hooks/classify.ts`.
 
 Each job gets a soft pink bar with a green growing tip, a plant that grows as the job runs, pass/fail counts, elapsed time, an ETA and the latest output line. When the job ends it either **blooms** or **wilts**:
 
@@ -19,7 +19,7 @@ A toast says "🌸 … bloomed" or "🥀 … wilted" when a job finishes. To rem
 - press Esc at an empty prompt
 - click **Close**, or press `x` while the pane has focus
 
-The pane opens again on its own when the next background job starts.
+The pane never opens on its own: jobs are tracked in the background, and `/progress` opens it to show them.
 
 Dev servers (`npm run dev:e2e`, `bench:serve`, `vite`, `wrangler dev`, `uvicorn`) get their own rows at the top: 🌿, the port when the command or output names one, and uptime. They have no bar and never bloom or wilt. To stop them from any terminal, run `/progress stop` (all servers) or `/progress stop 2` (the second row). Each row also has a **Stop** button, which in the regular terminal answers `1`, `2`, … while the pane has focus.
 
@@ -33,7 +33,7 @@ Every running job shows a bar from the start, at 0% until its output gives a cou
 
 This copy is set up for my own repos rather than general use:
 
-- **Followed in the background:** PokeJudge `dotnet run … evaluate`, ten-or-not `attacks.py` / `tuning_report.py` / `make_e2e_fixtures.py` / `click_measure.py`, `gh run watch`, `gh pr checks --watch` and `timeout N … wrangler tail`.
+- **Followed in the background:** test runs (vitest, jest, Playwright, pytest, `dotnet test`, `go test`, `cargo test`, and `npm`/`pnpm`/`yarn`/`bun` scripts named `test*` or `e2e*`) and PokeJudge case runs (`dotnet run … evaluate`). Anything else, such as CI watches, log tails or one-off scripts, is left alone, backgrounded or not.
 - **No sleep-waiting:** while a job (not a server) is running, a foreground `sleep` of 60 seconds or more is refused. The refusal tells Claude it will be notified when the job ends. Claude is also told not to redirect a background job into a log file of its own, since the pane can't see that file.
 - **Output it understands:** PokeJudge `Result: 13/20 scenarios fully passed` counts as 13 passed and 7 failed. ten-or-not `165 cases  2 WRONG` lines count as passed/failed. Card numbers (`096/182`) and centering ratios (`42/58`) aren't progress. `0.85 failed` (a reading) and `attempt 1 failed` (a retry) aren't failures.
 
@@ -41,10 +41,10 @@ This copy is set up for my own repos rather than general use:
 
 | Piece | What it does |
 | --- | --- |
-| `tool.call` (Bash, PowerShell) | Remembers each shell call's description as the job's label. Moves known test runners (vitest, jest, Playwright, pytest, `dotnet test`, `go test`, `cargo test`, `npm/pnpm/yarn/bun test·e2e·bench`) and my project runs to the background when the call didn't choose. Refuses a long `sleep` while a job runs. The rules live in `hooks/classify.ts`. |
-| `session.append` | Picks up a job from the shell result row ("running in background with ID: X. Output is being written to: P") and marks it finished from its `<task-notification>` row. |
+| `tool.call` (Bash, PowerShell) | Remembers each shell call's command and description (the job's label). Moves followed jobs to the background when the call didn't choose. Refuses a long `sleep` while a job runs. The rules live in `hooks/classify.ts`. |
+| `session.append` | Picks up a followed job or dev server from the shell result row ("running in background with ID: X. Output is being written to: P") and marks it finished from its `<task-notification>` row. Any other background task is ignored. |
 | `$.clock.every(1500)` | Re-reads each running job's output file when it grows and parses progress from it. |
-| `tool.describe` | Adds a line to the Bash/PowerShell tool descriptions asking Claude to background long jobs and to print `PROGRESS <done>/<total> <item>` lines from scripts it writes. |
+| `tool.describe` | Adds a line to the Bash/PowerShell tool descriptions asking Claude to run test runs and PokeJudge case runs in the background, unpiped. |
 | `ui.render` (Pane) | Draws the pane. `/progress` opens or closes it on demand. |
 
 Only background jobs are tracked: a foreground command's output isn't visible until it ends.
@@ -96,6 +96,6 @@ Gotcha found while building it: inside a `Text`, use arrays of `Text` children, 
 
 - Output files over 4 MiB stop updating (the `$.fs.read` cap); the pane keeps the last reading.
 - Auto-backgrounding applies to quick unit test runs too, so Claude waits for the completion notice instead of reading output inline. Remove the `RUNNER` rewrite in `hooks/register.tsx` if that gets in the way.
-- Labels are kept in module memory, so a job started just before a mod reload shows as "Background job".
+- Commands and labels are kept in module memory, so a job started just before a mod reload gets no row.
 - A job piped through `| tail -N` or `| head -N` shows no progress until it ends. The mod drops a trailing tail/head pipe from commands it backgrounds and asks Claude not to add one, but other filters (`| grep …`) still hide progress.
 - Python buffers output written to a file; scripts should run with `python -u` (or flush) for live `PROGRESS` lines.
