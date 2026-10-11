@@ -12,7 +12,7 @@ Each job gets a soft pink bar with a green growing tip, a plant that grows as th
 | --- | --- |
 | ![Two jobs mid-run with ETAs, and unit tests already bloomed](docs/running.png) | ![All three finished: two bloomed, one wilted with 2 failures](docs/finished.png) |
 
-A toast says "🌸 … bloomed" or "🥀 … wilted" when a job finishes. To remove finished jobs, run `/progress clear`, which works everywhere. Clicking **Clear finished** works in the desktop app and the fullscreen terminal. In the regular terminal, the button only responds to the `c` key while the pane has focus.
+When a job finishes, its row shows "🌸 bloomed" or "🥀 wilted". To remove finished jobs, run `/progress clear`, which works everywhere. Clicking **Clear finished** works in the desktop app and the fullscreen terminal. In the regular terminal, the button only responds to the `c` key while the pane has focus.
 
 `/progress` toggles the pane. To close it you can also:
 - run `/progress close`
@@ -27,7 +27,7 @@ Stopping a server kills its whole process tree, not just its task. On Windows, `
 
 A runner only counts when it's the program a step of the command runs. Quoted text is ignored, and the start of each `&&`, `;`, `|` or loop step is checked. A command that only mentions one (`-notmatch 'playwright|vitest'`, `cat vitest.config.ts`) is left alone.
 
-Every running job shows a bar from the start, at 0% until its output gives a count or percentage. A job that finishes without ever giving a count, percentage or pass/fail numbers gets one line with ✓ or ✗ instead of a full bar and a bloom. If it finishes in under 30 seconds, it's removed without a toast. Bars are at most 40 columns wide.
+Every running job shows a bar from the start, at 0% until its output gives a count or percentage. A job that finishes without ever giving a count, percentage or pass/fail numbers gets one line with ✓ or ✗ instead of a full bar and a bloom. If it finishes in under 30 seconds, it's removed from the pane. Bars are at most 40 columns wide.
 
 ### Tuned for my projects
 

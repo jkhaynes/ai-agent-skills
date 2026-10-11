@@ -47,7 +47,7 @@ const isServer = (job: Job) => job.kind === 'server'
 const hasProgress = (job: Job) =>
   job.total !== undefined || job.pct !== undefined || job.passed !== undefined || job.failed !== undefined
 // A job with no progress that ends this fast was a quick command Claude ran in the background,
-// not a run worth a row or a toast.
+// not a run worth a row.
 const QUICK_MS = 30_000
 const BAR_MAX = 40
 
@@ -222,17 +222,16 @@ export const register: Register = on => {
   const labels = new Map<string, { label: string; command: string }>()
 
   on('tool.call', async ($, e, next) => {
-    if (!SHELLS.includes(e.tool)) return next(e)
-    const args = e as typeof e & { command?: string; description?: string; run_in_background?: boolean }
-    const command = args.command ?? ''
-    labels.set(e.tool_use_id, { label: args.description || command.slice(0, 60), command })
-    const deny = args.run_in_background ? undefined : sleepDenial(command, (await read($, jobs)) ?? [])
+    if (e.tool !== 'Bash' && e.tool !== 'PowerShell') return next(e)
+    const command = e.command ?? ''
+    labels.set(e.tool_use_id, { label: e.description || command.slice(0, 60), command })
+    const deny = e.run_in_background ? undefined : sleepDenial(command, (await read($, jobs)) ?? [])
     if (deny) return { deny }
-    if (args.run_in_background === false) return next(e)
+    if (e.run_in_background === false) return next(e)
     // Followed jobs go to the background; a server Claude backgrounds is marked for stopping.
     // Any other command, backgrounded or not, is left as it is.
     if (isFollowed(command)) return next({ ...e, run_in_background: true, command: backgroundCommand(e.tool, command) })
-    if (args.run_in_background && isServerCommand(command)) {
+    if (e.run_in_background && isServerCommand(command)) {
       return next({ ...e, command: tagCommand(e.tool, backgroundCommand(e.tool, command), e.tool_use_id) })
     }
     return next(e)
@@ -249,8 +248,9 @@ export const register: Register = on => {
     const kind = rowKind(call?.command)
     const server = kind === 'server'
     // Only followed jobs and dev servers get a row; any other background task is not the pane's.
-    if (started && call && kind) {
-      const [, id, path] = started
+    const [, startedId, path] = started ?? []
+    if (startedId && path && call && kind) {
+      const id = startedId
       const job: Job = {
         id,
         path,
@@ -273,10 +273,11 @@ export const register: Register = on => {
       } else if (job && job.status === 'running') {
         // A job already marked stopped by the TaskStop hook keeps that, with no bloom or wilt.
         await refresh($, job, status)
+        // No toast when a job finishes: the pane's row shows the bloom or wilt.
         const done = (await read($, jobs))?.find(j => j.id === id)
         if (done && !hasProgress(done) && (done.endedAt ?? 0) - done.startedAt < QUICK_MS) {
           await update($, jobs, list => (list ?? []).filter(j => j.id !== id))
-        } else if (done) $.ui.toast(`${isBloomed(done) ? '🌸' : '🥀'} ${done.label} ${isBloomed(done) ? 'bloomed' : 'wilted'} ${summary(done)}`.trim())
+        }
       }
     }
     return next(e)
