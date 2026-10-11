@@ -23,5 +23,6 @@ Claude Code-only plugins (function hooks: panes, bands, toasts) live under mods/
 
 - [job-progress](mods/job-progress/README.md): live Progress pane for test runs and PokeJudge case runs, with a pink bar and a plant that blooms or wilts.
 - [spec-resume](mods/spec-resume/README.md): after startup or `/clear` in one of my Spec Kit repos (GitHub owner allowlist), tells Claude the branch, current spec and phase, unchecked tasks, open PRs and `docs/state.md` focus. Pairs with the `phase-done` skill.
+- [savvy-progress](mods/savvy-progress/README.md): pink copy of johnnyvizz's savvy-progress that also follows superpowers' subagent-driven development: an agents panel (`/agents-info`) with every subagent's model, context, estimated cost and time, and a progress bar above the prompt.
 
 ![job-progress demo](mods/job-progress/docs/job-progress.gif)

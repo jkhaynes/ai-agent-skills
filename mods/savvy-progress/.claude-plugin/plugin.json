@@ -1,0 +1,26 @@
+{
+  "name": "savvy-progress",
+  "version": "1.2.0-pink.3",
+  "description": "Pink copy of johnnyvizz/savvy-progress: progress bar above the prompt plus an agents panel (/agents-info) of running, finished and planned subagents with model, task progress, context, cost and time.",
+  "author": {
+    "name": "johnnyvizz",
+    "url": "https://github.com/johnnyvizz"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "language": {
+      "type": "string",
+      "title": "Panel language",
+      "description": "auto follows Claude Code's language setting, then the system locale",
+      "default": "auto",
+      "options": [
+        "auto",
+        "en",
+        "ru"
+      ]
+    }
+  },
+  "homepage": "https://github.com/jkhaynes/ai-agent-skills/tree/master/mods/savvy-progress",
+  "repository": "https://github.com/johnnyvizz/claude-kit",
+  "license": "MIT"
+}
