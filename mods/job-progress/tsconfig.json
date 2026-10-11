@@ -1,3 +1,5 @@
 {
-  "extends": "./.claude-plugin/types/tsconfig.json"
+  "extends": "./.claude-plugin/types/tsconfig.json",
+  // The .check.mts files are plain Node scripts (run with `node`, see the README), not mod code.
+  "exclude": ["hooks/*.check.mts"]
 }

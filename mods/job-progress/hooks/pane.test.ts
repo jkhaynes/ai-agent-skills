@@ -3,8 +3,8 @@ import { test, expect } from 'claude-code/testing'
 // The test stands in for the engine's pane record: ui.open adds, ui.close removes, ui.panes lists.
 function fakePanes(on: any) {
   const open = new Set<string>()
-  on('ui.open', ($: unknown, e: { id: string }) => (open.add(e.id), { isPlaced: true }))
-  on('ui.close', ($: unknown, e: { id: string }) => void open.delete(e.id))
+  on('ui.open', ($: unknown, e: { id: string }) => (open.add(e.id), { value: { isPlaced: true } }))
+  on('ui.close', ($: unknown, e: { id: string }) => (open.delete(e.id), { value: undefined }))
   on('ui.panes', () => ({ value: [...open].map(id => ({ id, title: id, isShown: true, isFocused: false, isPlaced: true })) }))
   on('command.run', () => ({ text: '' }))
   return open
