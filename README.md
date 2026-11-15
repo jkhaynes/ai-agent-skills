@@ -23,6 +23,7 @@ npx skills add jkhaynes/ai-agent-skills --skill '*' --global --agent claude-code
 Claude Code-only plugins (function hooks: panes, bands, toasts) live under mods/<mod-name>/. They aren't installed by `npx skills`; each mod's README says how to load it.
 
 - [job-progress](mods/job-progress/README.md): live Progress pane for test runs and PokeJudge case runs, with a pink bar and a plant that blooms or wilts.
+- [review-board](mods/review-board/README.md): my review panel dashboard in a pane beside the chat (`/board`): features by stage, reviewer verdicts per round, the approver's decision, CI, and the subagents the session is running. Reads `scripts/dashboard.py --json` from my project template, only while the pane is open.
 - [spec-resume](mods/spec-resume/README.md): after startup or `/clear` in one of my Spec Kit repos (GitHub owner allowlist), tells Claude the branch, current spec and phase, unchecked tasks, open PRs and `docs/state.md` focus. Pairs with the `phase-done` skill.
 - [savvy-progress](mods/savvy-progress/README.md): pink copy of johnnyvizz's savvy-progress that also follows superpowers' subagent-driven development: an agents panel (`/agents-info`) with every subagent's model, context, estimated cost and time, and a progress bar above the prompt.
 

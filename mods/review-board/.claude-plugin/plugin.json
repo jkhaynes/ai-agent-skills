@@ -1,0 +1,6 @@
+{
+  "name": "review-board",
+  "version": "0.1.0",
+  "description": "A pane beside the chat with the review panel board (features, review rounds, verdicts, CI) and the subagents this session is running",
+  "types": "./types/index.d.ts"
+}
