@@ -1,0 +1,12 @@
+{
+  "name": "ai-agent-skills",
+  "owner": { "name": "jkhaynes" },
+  "description": "Claude Code mods from jkhaynes/ai-agent-skills.",
+  "plugins": [
+    {
+      "name": "catppuccin",
+      "source": "./mods/catppuccin",
+      "description": "Catppuccin for the desktop Code tab (Mocha dark, Latte light) with a pink accent and a drifting sakura backdrop."
+    }
+  ]
+}
