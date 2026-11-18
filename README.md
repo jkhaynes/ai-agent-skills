@@ -20,7 +20,9 @@ npx skills add jkhaynes/ai-agent-skills --skill '*' --global --agent claude-code
 
 ## Mods
 
-Claude Code-only plugins (function hooks: panes, bands, toasts) live under mods/<mod-name>/. They aren't installed by `npx skills`; each mod's README says how to load it.
+Claude Code-only plugins (function hooks: panes, bands, toasts) live under mods/<mod-name>/. They aren't installed by `npx skills`; each mod's README says how to load it. Mods listed in `.claude-plugin/marketplace.json` also install with one line, for example `/plugin install catppuccin --marketplace jkhaynes/ai-agent-skills`.
+
+- [catppuccin](mods/catppuccin/README.md): Catppuccin theme for the desktop Code tab (Mocha dark, Latte light) with a pink accent and a drifting sakura backdrop.
 
 - [job-progress](mods/job-progress/README.md): live Progress pane for test runs and PokeJudge case runs, with a pink bar and a plant that blooms or wilts.
 - [review-board](mods/review-board/README.md): my review panel dashboard in a pane beside the chat (`/board`): features by stage, reviewer verdicts per round, the approver's decision, CI, and the subagents the session is running. Reads `scripts/dashboard.py --json` from my project template, only while the pane is open.
